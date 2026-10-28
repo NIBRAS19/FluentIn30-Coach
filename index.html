@@ -1,9 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark" data-brand="indigo">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FluentIn30 — Interactive 30-Day English Communication Coach</title>
+  <title>FluentIn30 Studio — 30-Day English Communication Coach</title>
+  <!-- Prevent Flash of Unstyled Theme -->
+  <script>
+    (function () {
+      try {
+        var savedTheme = localStorage.getItem('fluent30_theme') || 'dark';
+        var savedBrand = localStorage.getItem('fluent30_brand') || 'indigo';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.documentElement.setAttribute('data-brand', savedBrand);
+      } catch (e) {}
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -11,23 +22,42 @@
 </head>
 <body>
 
-  <!-- Top Navigation & Progress Header -->
+  <!-- Top Navigation & Theme/Progress Header -->
   <header class="top-header">
     <div class="header-inner">
       <div class="brand">
         <div class="brand-badge">30</div>
         <div>
-          <div class="brand-title">FluentIn30 Coach</div>
-          <div class="brand-subtitle">80% Speaking & Listening • 20% High-Impact Phrases</div>
+          <div class="brand-title">
+            FluentIn30 Studio
+            <span class="brand-tag">PRO FLOW</span>
+          </div>
+          <div class="brand-subtitle">Guided 45-Min Daily English Speaking & Fluency System</div>
         </div>
       </div>
 
-      <div class="header-stats">
+      <div class="header-controls">
+        <!-- Voice Selector -->
+        <select id="voiceSelect" class="voice-select" title="Choose English Accent / Voice">
+          <option value="">🌐 Auto English Voice</option>
+        </select>
+
+        <!-- Color Schema & Light/Dark Switcher -->
+        <div class="theme-bar" title="Choose Color Schema & Theme">
+          <button class="swatch-btn swatch-indigo active" data-brand-choice="indigo" title="Royal Indigo Schema" type="button"></button>
+          <button class="swatch-btn swatch-emerald" data-brand-choice="emerald" title="Emerald Mint Schema" type="button"></button>
+          <button class="swatch-btn swatch-ocean" data-brand-choice="ocean" title="Ocean Sapphire Schema" type="button"></button>
+          <button class="swatch-btn swatch-amber" data-brand-choice="amber" title="Sunset Amber Schema" type="button"></button>
+          <span style="opacity: 0.25; padding: 0 2px;">|</span>
+          <button id="themeToggleBtn" class="theme-toggle-btn" title="Switch Dark / Light Mode" type="button">☀️</button>
+        </div>
+
+        <!-- Streak & 30-Day Progress -->
         <div class="stat-pill">
           🔥 Streak: <span id="streakCountText" class="stat-highlight">0 Days</span>
         </div>
         <div class="stat-pill">
-          ✅ Progress: <span id="completedCountText" class="stat-highlight">0 / 30 Days</span>
+          🏆 <span id="completedCountText" class="stat-highlight">0 / 30</span>
           <div class="progress-bar-wrap">
             <div id="progressBarFill" class="progress-bar-fill"></div>
           </div>
@@ -42,40 +72,42 @@
 
     <!-- Left Sidebar: 30-Day Roadmap & Daily Routine Checklist -->
     <aside class="sidebar">
-      <div class="sidebar-section-title">
-        <span>30-Day Roadmap</span>
-        <span style="color: var(--accent-cyan);">Select Day</span>
+      <div class="sidebar-block-header">
+        <span>30-Day Curriculum</span>
+        <span id="currentWeekBadge" style="color: var(--brand-text);">All Weeks</span>
       </div>
 
       <div class="week-filter">
         <button class="week-tab active" data-week="0" type="button">All 30 Days</button>
-        <button class="week-tab" data-week="1" type="button">Week 1: Basics</button>
-        <button class="week-tab" data-week="2" type="button">Week 2: Chat</button>
-        <button class="week-tab" data-week="3" type="button">Week 3: PREP</button>
-        <button class="week-tab" data-week="4" type="button" style="grid-column: span 2;">Week 4: Real-World Fluency</button>
+        <button class="week-tab" data-week="1" type="button">W1: Survival</button>
+        <button class="week-tab" data-week="2" type="button">W2: Small Talk</button>
+        <button class="week-tab" data-week="3" type="button">W3: PREP Story</button>
+        <button class="week-tab" data-week="4" type="button" style="grid-column: span 2;">W4: Real-World Fluency</button>
       </div>
 
       <div id="daysGrid" class="days-grid"></div>
 
-      <div class="sidebar-section-title">
-        <span>Today's 45-Min Routine</span>
+      <div class="sidebar-block-header">
+        <span>Today's 45-Min Checklist</span>
+        <span id="routineProgressText" style="color: var(--status-success);">0/3 Done</span>
       </div>
+
       <div class="routine-box">
         <label class="routine-item">
-          <input type="checkbox" id="check-listen" />
-          <span><strong>15m Listen & Shadow:</strong> Play the roleplay dialogue & repeat out loud</span>
+          <input type="checkbox" id="check-phrases" />
+          <span><strong>Step 1 (15m):</strong> Listen & practice today's 5 sentence starters</span>
         </label>
         <label class="routine-item">
-          <input type="checkbox" id="check-phrases" />
-          <span><strong>15m Master 5 Phrases:</strong> Listen & test pronunciation</span>
+          <input type="checkbox" id="check-listen" />
+          <span><strong>Step 2 (15m):</strong> Shadow the interactive conversation roleplay</span>
         </label>
         <label class="routine-item">
           <input type="checkbox" id="check-speak" />
-          <span><strong>15m Speak Out Loud:</strong> Record your 2-minute speaking prompt</span>
+          <span><strong>Step 3 (15m):</strong> Record your 2-minute PREP speaking prompt</span>
         </label>
       </div>
 
-      <button id="markDayCompleteBtn" class="btn btn-primary" type="button" style="width: 100%;">
+      <button id="markDayCompleteBtn" class="btn btn-primary" type="button" style="width: 100%; padding: 0.7rem;">
         🏆 Mark Day 1 Complete
       </button>
     </aside>
@@ -83,46 +115,86 @@
     <!-- Main Content Area -->
     <main class="main-content">
 
-      <!-- Mode Switcher -->
-      <div class="mode-tabs">
-        <button class="mode-tab active" data-view="lesson" type="button">
-          📅 Daily Speaking Lesson
-        </button>
-        <button class="mode-tab" data-view="phrasebook" type="button">
-          🛟 Emergency Phrasebook (Fillers & Connectors)
-        </button>
-        <button class="mode-tab" data-view="shadowlab" type="button">
-          🎙️ Custom Pronunciation & Shadowing Lab
-        </button>
+      <!-- Top View Switcher -->
+      <div class="nav-tabs-bar">
+        <div class="mode-tabs">
+          <button class="mode-tab active" data-view="lesson" type="button">
+            📅 Daily Guided Workout
+          </button>
+          <button class="mode-tab" data-view="flashcards" type="button">
+            ⭐ Saved Phrases & Quiz <span id="savedCountBadge" class="badge-count">0</span>
+          </button>
+          <button class="mode-tab" data-view="phrasebook" type="button">
+            🛟 Emergency Phrasebook
+          </button>
+          <button class="mode-tab" data-view="shadowlab" type="button">
+            🎙️ Custom Shadowing Lab
+          </button>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.4rem;">
+          <button id="toggleFlowModeBtn" class="btn btn-sm" type="button" title="Switch between Step-by-Step Focus or All Steps View">
+            📑 View: Guided Step-by-Step
+          </button>
+        </div>
       </div>
 
-      <!-- VIEW 1: DAILY LESSON -->
-      <div id="view-lesson" style="display: flex; flex-direction: column; gap: var(--space-6);">
+      <!-- =================================================================
+           VIEW 1: DAILY GUIDED WORKOUT
+           ================================================================= -->
+      <div id="view-lesson" style="display: flex; flex-direction: column; gap: var(--space-5);">
 
         <!-- Day Hero Banner -->
         <section class="day-hero">
           <div class="day-hero-top">
             <span id="dayEyebrow" class="day-eyebrow">Day 1 of 30 • Week 1</span>
-            <div class="day-nav-btns">
+            <div style="display: flex; gap: var(--space-2);">
               <button id="prevDayBtn" class="btn btn-sm" type="button">← Prev Day</button>
               <button id="nextDayBtn" class="btn btn-sm" type="button">Next Day →</button>
             </div>
           </div>
           <h1 id="dayTitle" class="day-title">Natural Self-Introduction</h1>
-          <p id="dayGoal" class="day-goal">Goal description</p>
+          <p id="dayGoal" class="day-goal"></p>
           <div id="dayTip" class="coach-tip"></div>
         </section>
 
-        <!-- Step 1: 5 Sentence Starters -->
-        <section class="section-card">
+        <!-- Interactive 3-Step Workflow Stepper -->
+        <div class="workflow-bar">
+          <button class="step-pill active" data-step="1" type="button">
+            <div class="step-num" id="stepNum1">1</div>
+            <div>
+              <div class="step-info-title">5 Sentence Starters</div>
+              <div class="step-info-sub" id="stepSub1">0 / 5 practiced</div>
+            </div>
+          </button>
+
+          <button class="step-pill" data-step="2" type="button">
+            <div class="step-num" id="stepNum2">2</div>
+            <div>
+              <div class="step-info-title">Roleplay Simulator</div>
+              <div class="step-info-sub" id="stepSub2">15m Shadowing</div>
+            </div>
+          </button>
+
+          <button class="step-pill" data-step="3" type="button">
+            <div class="step-num" id="stepNum3">3</div>
+            <div>
+              <div class="step-info-title">2-Min Speaking Studio</div>
+              <div class="step-info-sub" id="stepSub3">PREP + Voice Record</div>
+            </div>
+          </button>
+        </div>
+
+        <!-- STEP 1 CARD: 5 SENTENCE STARTERS -->
+        <section id="stepCard1" class="section-card">
           <div class="section-header">
             <div>
               <h2 class="section-title">
-                1. Today's 5 Sentence Starters
-                <span class="section-badge">15 Mins • Don't memorize single words</span>
+                Step 1: Master Today's 5 Sentence Starters
+                <span class="section-badge" id="phrasesPracticedBadge">0 / 5 Practiced</span>
               </h2>
-              <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.2rem;">
-                Click <strong>Listen (1x)</strong> to hear natural speed, <strong>Shadow (0.75x)</strong> to repeat along out loud, and <strong>Speak & Check</strong> to test your voice.
+              <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.25rem;">
+                Listen at normal speed, shadow out loud at 0.75x speed, and click <strong>🎙️ Speak & Check</strong> to verify your clarity. Click ⭐ to save your favorites!
               </p>
             </div>
             <button id="playAllPhrasesBtn" class="btn btn-primary btn-sm" type="button">
@@ -131,54 +203,92 @@
           </div>
 
           <div id="phrasesList" class="phrases-list"></div>
+
+          <div class="step-footer-nav">
+            <span style="font-size: 0.84rem; color: var(--text-muted);">
+              💡 Tip: Say each example sentence out loud 3 times before moving to Step 2.
+            </span>
+            <button class="btn btn-primary goto-step-btn" data-target-step="2" type="button">
+              Continue to Step 2: Roleplay Simulator →
+            </button>
+          </div>
         </section>
 
-        <!-- Step 2: Interactive Roleplay & Shadowing -->
-        <section class="section-card">
+        <!-- STEP 2 CARD: INTERACTIVE ROLEPLAY & SHADOWING -->
+        <section id="stepCard2" class="section-card hidden">
           <div class="section-header">
             <div>
               <h2 class="section-title">
-                2. Real-World Conversation Shadowing
-                <span class="section-badge">15 Mins • Ear & Mouth Training</span>
+                Step 2: Real-World Conversation Simulator
+                <span class="section-badge">Ear & Mouth Training</span>
               </h2>
-              <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.2rem;">
-                Listen to the conversation flow and read the highlighted <strong>"You"</strong> lines out loud with matching tone and rhythm.
+              <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.25rem;">
+                Practice natural back-and-forth flow. Try <strong>🎭 Interactive Roleplay</strong> where the app speaks Partner's lines and listens to You!
               </p>
             </div>
-            <button id="playDialogueBtn" class="btn btn-primary btn-sm" type="button">
-              🗣️ Play Full Conversation
-            </button>
+          </div>
+
+          <!-- Dialogue Controls Toolbar -->
+          <div class="dialogue-toolbar">
+            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap;">
+              <button id="playDialogueBtn" class="btn btn-primary btn-sm" type="button">
+                🎧 Listen Full Dialogue
+              </button>
+              <button id="interactiveRoleplayBtn" class="btn btn-sm" type="button">
+                🎭 Interactive Roleplay (Partner + Mic)
+              </button>
+              <button id="blindListenToggleBtn" class="btn btn-sm" type="button">
+                🙈 Blind Listening: Off
+              </button>
+            </div>
+            <span id="roleplayStatusText" style="font-size: 0.82rem; color: var(--brand-text); font-weight: 600;">
+              Click any line's 🔊 button or start a roleplay mode
+            </span>
           </div>
 
           <div id="dialogueContainer" class="dialogue-container"></div>
+
+          <div class="step-footer-nav">
+            <button class="btn goto-step-btn" data-target-step="1" type="button">
+              ← Back to Step 1: Phrases
+            </button>
+            <button class="btn btn-primary goto-step-btn" data-target-step="3" type="button">
+              Continue to Step 3: 2-Min Speaking Studio →
+            </button>
+          </div>
         </section>
 
-        <!-- Step 3: 2-Minute Active Speaking Studio (PREP Formula + Voice Recorder) -->
-        <section class="section-card">
+        <!-- STEP 3 CARD: 2-MINUTE SPEAKING STUDIO -->
+        <section id="stepCard3" class="section-card hidden">
           <div class="section-header">
             <div>
               <h2 class="section-title">
-                3. 2-Minute Speaking Studio (PREP Method)
-                <span class="section-badge">15 Mins • Active Output</span>
+                Step 3: 2-Minute Active Speaking Studio
+                <span class="section-badge">PREP Method + Live Transcript</span>
               </h2>
-              <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.2rem;">
-                Speak out loud without stopping! Record your voice note below and listen back to spot where you hesitated.
+              <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.25rem;">
+                Structure your thoughts with <strong>P-R-E-P</strong>, hit <strong>🎙️ Start Studio Recording</strong>, and speak non-stop until the ring completes!
               </p>
             </div>
-          </div>
-
-          <div style="background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.35); padding: var(--space-4); border-radius: var(--radius-md); margin-bottom: var(--space-4);">
-            <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: #a5b4fc; font-weight: 700;">
-              Today's Speaking Prompt
+            <div style="display: flex; gap: 0.35rem;">
+              <button class="btn btn-sm duration-preset-btn" data-seconds="60" type="button">1:00</button>
+              <button class="btn btn-sm duration-preset-btn active" data-seconds="120" type="button" style="border-color: var(--brand-primary);">2:00</button>
+              <button class="btn btn-sm duration-preset-btn" data-seconds="180" type="button">3:00</button>
             </div>
-            <div id="speakingQuestion" style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-top: 0.2rem;"></div>
           </div>
 
-          <!-- PREP Guide -->
+          <div class="prompt-banner">
+            <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--brand-text); font-weight: 800;">
+              🎤 Today's Speaking Challenge
+            </div>
+            <div id="speakingQuestion" style="font-size: 1.18rem; font-weight: 800; color: var(--text-primary); margin-top: 0.25rem;"></div>
+          </div>
+
+          <!-- PREP Formula Helper Cards -->
           <div class="prep-grid">
             <div class="prep-step">
               <span class="prep-letter">P</span>
-              <h4>Point (Start Clear)</h4>
+              <h4>Point (State Clearly)</h4>
               <p id="prepPoint"></p>
             </div>
             <div class="prep-step">
@@ -188,7 +298,7 @@
             </div>
             <div class="prep-step">
               <span class="prep-letter">E</span>
-              <h4>Example (For instance...)</h4>
+              <h4>Example (Story / Detail)</h4>
               <p id="prepExample"></p>
             </div>
             <div class="prep-step">
@@ -198,25 +308,48 @@
             </div>
           </div>
 
-          <!-- Timer & Microphone Recorder -->
-          <div class="studio-controls">
-            <div style="display: flex; align-items: center; gap: var(--space-4);">
-              <div id="timerDisplay" class="timer-display">02:00</div>
-              <div id="recordingIndicator" class="recording-indicator hidden">
-                <span class="pulse-dot"></span> Recording your voice...
+          <!-- Interactive Studio Deck: SVG Ring Timer + Waveform + Live Transcript -->
+          <div class="studio-deck">
+            <div class="timer-ring-wrap">
+              <svg class="timer-ring-svg" viewBox="0 0 120 120">
+                <circle class="timer-ring-bg" cx="60" cy="60" r="55"></circle>
+                <circle id="timerRingProgress" class="timer-ring-progress" cx="60" cy="60" r="55"></circle>
+              </svg>
+              <div class="timer-center-text">
+                <div id="timerDisplay" class="timer-display">02:00</div>
+                <div id="timerSubText" class="timer-sub">READY</div>
               </div>
             </div>
 
-            <div style="display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap;">
-              <button id="timerToggleBtn" class="btn" type="button">⏱️ Start 2:00 Timer</button>
-              <button id="timerResetBtn" class="btn" type="button">↺ Reset</button>
-              <button id="recordVoiceBtn" class="btn btn-primary" type="button">🎙️ Record My Voice</button>
+            <div class="studio-right">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap;">
+                <div style="display: flex; gap: var(--space-2); flex-wrap: wrap;">
+                  <button id="recordVoiceBtn" class="btn btn-primary" type="button">
+                    🎙️ Start Studio Recording
+                  </button>
+                  <button id="timerToggleBtn" class="btn" type="button">
+                    ⏱️ Timer Only
+                  </button>
+                  <button id="timerResetBtn" class="btn" type="button">
+                    ↺ Reset
+                  </button>
+                </div>
+                <div id="wpmStatsBadge" class="section-badge">0 Words • 0 WPM</div>
+              </div>
+
+              <!-- Live Microphone Waveform Visualizer -->
+              <canvas id="waveformCanvas" class="waveform-canvas" width="600" height="54"></canvas>
+
+              <!-- Live Speech-to-Text Transcript -->
+              <div id="liveTranscriptBox" class="live-transcript-box">
+                💬 <em>Your live spoken transcript will appear here while recording...</em>
+              </div>
             </div>
           </div>
 
           <!-- Recorded Audio Player -->
           <div id="audioPlaybackArea" class="audio-playback-area">
-            <span style="font-size: 0.88rem; font-weight: 600; color: #6ee7b7;">🎧 Your Recording:</span>
+            <span style="font-size: 0.86rem; font-weight: 700; color: var(--status-success);">🎧 Latest Take:</span>
             <audio id="recordedAudioPlayer" controls></audio>
             <a id="downloadAudioBtn" class="btn btn-sm" href="#" download="Day-1-English.webm">💾 Save Audio</a>
           </div>
@@ -225,28 +358,93 @@
           <textarea
             id="dailyNotesInput"
             class="notes-textarea"
-            placeholder="Optional: Jot down 3 bullet points before you speak, or write down words you want to remember from today..."
+            placeholder="📝 Personal Reflection & Bullet Points: Jot down 3 quick keywords before speaking, or note areas to improve..."
           ></textarea>
+
+          <div class="step-footer-nav">
+            <button class="btn goto-step-btn" data-target-step="2" type="button">
+              ← Back to Step 2: Roleplay
+            </button>
+            <button id="finishDayCelebrationBtn" class="btn btn-success" type="button">
+              🎉 Complete Day & Go to Next Day →
+            </button>
+          </div>
         </section>
       </div>
 
-      <!-- VIEW 2: EMERGENCY PHRASEBOOK -->
+      <!-- =================================================================
+           VIEW 2: SAVED PHRASES & FLASHCARD QUIZ
+           ================================================================= -->
+      <div id="view-flashcards" class="hidden">
+        <section class="section-card">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">
+                ⭐ Flashcard Practice & Saved Phrases
+                <span class="section-badge" id="flashcardDeckInfo">Interactive Recall</span>
+              </h2>
+              <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.25rem;">
+                Test your memory! Read the scenario prompt, say the phrase out loud, then click the card to flip and listen.
+              </p>
+            </div>
+            <div style="display: flex; gap: var(--space-2);">
+              <button id="deckSourceSavedBtn" class="btn btn-sm active" type="button">⭐ My Saved Phrases</button>
+              <button id="deckSourceCurrentDayBtn" class="btn btn-sm" type="button">📅 Today's 5 Phrases</button>
+              <button id="deckSourceRandomBtn" class="btn btn-sm" type="button">🎲 Random 10 Mix</button>
+            </div>
+          </div>
+
+          <div class="flashcard-stage">
+            <div id="flashcardBox" class="flashcard-box">
+              <span class="section-badge" id="flashcardCounter">Card 1 of 5</span>
+              <div id="flashcardFront" style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary);"></div>
+              <div id="flashcardBack" class="hidden" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <div id="flashcardExample" style="font-size: 1.1rem; color: var(--brand-text); font-weight: 700;"></div>
+                <div id="flashcardContext" style="font-size: 0.88rem; color: var(--text-muted);"></div>
+              </div>
+              <span style="font-size: 0.78rem; color: var(--text-muted);">👆 Click card to flip • Press 🔊 to hear</span>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: center; gap: var(--space-3); margin-top: var(--space-4);">
+              <button id="prevFlashcardBtn" class="btn" type="button">← Previous</button>
+              <button id="speakFlashcardBtn" class="btn btn-primary" type="button">🔊 Listen Example</button>
+              <button id="nextFlashcardBtn" class="btn" type="button">Next Card →</button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- =================================================================
+           VIEW 3: EMERGENCY PHRASEBOOK
+           ================================================================= -->
       <div id="view-phrasebook" class="hidden">
-        <div class="section-card" style="margin-bottom: var(--space-6);">
-          <h2 class="section-title">🛟 Never Freeze Again: Emergency Conversation Phrasebook</h2>
-          <p style="color: var(--text-secondary); font-size: 0.95rem; margin-top: 0.35rem;">
-            Use these natural phrases whenever your mind goes blank, you forget an English word, or someone speaks too fast. Click 🔊 to hear the exact intonation.
-          </p>
+        <div class="section-card" style="margin-bottom: var(--space-5);">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap;">
+            <div>
+              <h2 class="section-title">🛟 Emergency Conversation Phrasebook</h2>
+              <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;">
+                Instant fillers, connectors, and paraphrasing rescues so you never freeze in a conversation.
+              </p>
+            </div>
+            <input
+              id="phrasebookSearchInput"
+              type="search"
+              placeholder="🔍 Search phrases (e.g. think, repeat, word)..."
+              style="background: var(--surface-2); border: 1px solid var(--border-subtle); color: var(--text-primary); padding: 0.55rem 1rem; border-radius: var(--radius-full); min-width: 260px; font-size: 0.86rem;"
+            />
+          </div>
         </div>
         <div id="phrasebookGrid" class="phrasebook-grid"></div>
       </div>
 
-      <!-- VIEW 3: CUSTOM PRONUNCIATION & SHADOWING LAB -->
+      <!-- =================================================================
+           VIEW 4: CUSTOM PRONUNCIATION & SHADOWING LAB
+           ================================================================= -->
       <div id="view-shadowlab" class="hidden">
         <section class="section-card">
           <h2 class="section-title">🎙️ Any-Sentence Pronunciation & Shadowing Coach</h2>
-          <p style="color: var(--text-secondary); font-size: 0.95rem; margin-top: 0.35rem; margin-bottom: var(--space-4);">
-            Type or paste any sentence you need to say at work, in an interview, or in daily life. Listen at normal or slow speed, then test your spoken pronunciation!
+          <p style="color: var(--text-secondary); font-size: 0.92rem; margin-top: 0.35rem; margin-bottom: var(--space-4);">
+            Type or paste any sentence you need for a meeting, interview, or daily conversation. Listen at normal or slow speed, then test your spoken clarity!
           </p>
 
           <textarea
@@ -274,6 +472,9 @@
 
     </main>
   </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
 
   <script src="data.js"></script>
   <script src="app.js"></script>
