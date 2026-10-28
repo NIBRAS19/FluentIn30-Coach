@@ -48,7 +48,6 @@ function loadState() {
       const parsed = JSON.parse(raw);
       state = { ...state, ...parsed };
     } else {
-      // Migrate from v1 if present
       const v1 = localStorage.getItem('english_30day_coach_v1');
       if (v1) {
         const parsedV1 = JSON.parse(v1);
@@ -81,7 +80,22 @@ function showToast(message) {
     toast.style.transform = 'translateY(8px)';
     toast.style.transition = 'all 0.25s ease';
     setTimeout(() => toast.remove(), 260);
-  }, 2800);
+  }, 2600);
+}
+
+/* ===== MOBILE DRAWER CONTROLLER ===== */
+function openMobileDrawer() {
+  const sidebar = document.getElementById('appSidebar');
+  const backdrop = document.getElementById('mobileDrawerBackdrop');
+  if (sidebar) sidebar.classList.add('drawer-open');
+  if (backdrop) backdrop.classList.remove('hidden');
+}
+
+function closeMobileDrawer() {
+  const sidebar = document.getElementById('appSidebar');
+  const backdrop = document.getElementById('mobileDrawerBackdrop');
+  if (sidebar) sidebar.classList.remove('drawer-open');
+  if (backdrop) backdrop.classList.add('hidden');
 }
 
 /* ===== THEME & BRAND SCHEMA CONTROLLER ===== */
@@ -96,7 +110,7 @@ function initThemeAndBrand() {
     document.documentElement.setAttribute('data-theme', now);
     localStorage.setItem('fluent30_theme', now);
     updateThemeUI(now, document.documentElement.getAttribute('data-brand'));
-    showToast(now === 'light' ? '☀️ Switched to Crisp Daylight Mode' : '🌙 Switched to Midnight Aurora Mode');
+    showToast(now === 'light' ? '☀️ Crisp Daylight Mode' : '🌙 Midnight Aurora Mode');
   });
 
   document.querySelectorAll('[data-brand-choice]').forEach((btn) => {
@@ -129,17 +143,22 @@ function updateThemeUI(theme, brand) {
 /* ===== VOICE SELECTOR & TEXT-TO-SPEECH ===== */
 function populateVoiceList() {
   if (!('speechSynthesis' in window)) return;
-  const select = document.getElementById('voiceSelect');
+  const selects = [
+    document.getElementById('voiceSelect'),
+    document.getElementById('voiceSelectMobile')
+  ].filter(Boolean);
   const voices = window.speechSynthesis.getVoices().filter((v) => v.lang.startsWith('en'));
   if (!voices.length) return;
 
-  select.innerHTML = '<option value="">🌐 Auto Best English Voice</option>';
-  voices.forEach((v) => {
-    const opt = document.createElement('option');
-    opt.value = v.voiceURI;
-    opt.textContent = `${v.name.replace(/Microsoft |Google /g, '')} (${v.lang})`;
-    if (state.selectedVoiceURI === v.voiceURI) opt.selected = true;
-    select.appendChild(opt);
+  selects.forEach((select) => {
+    select.innerHTML = '<option value="">🌐 Auto Best English Voice</option>';
+    voices.forEach((v) => {
+      const opt = document.createElement('option');
+      opt.value = v.voiceURI;
+      opt.textContent = `${v.name.replace(/Microsoft |Google /g, '')} (${v.lang})`;
+      if (state.selectedVoiceURI === v.voiceURI) opt.selected = true;
+      select.appendChild(opt);
+    });
   });
 }
 
@@ -208,7 +227,7 @@ function checkPronunciation(targetSentence, feedbackEl, btnEl, onSuccess = null)
       feedbackEl.className = 'speech-feedback visible try-again';
       feedbackEl.innerHTML = `💡 <strong>Almost there (${Math.round(
         score * 100
-      )}% match)</strong> — Heard: <em>"${transcript}"</em>. Try speaking slowly and stressing key words!`;
+      )}% match)</strong> — Heard: <em>"${transcript}"</em>. Try speaking slowly!`;
     }
   };
 
@@ -244,12 +263,12 @@ function calculateSimilarity(target, spoken) {
   return matches / targetWords.length;
 }
 
-/* ===== HEADER & SIDEBAR RENDERING ===== */
+/* ===== HEADER, MOBILE STRIP & SIDEBAR RENDERING ===== */
 function renderHeaderStats() {
   const completedCount = state.completedDays.length;
   const pct = Math.round((completedCount / 30) * 100);
 
-  document.getElementById('completedCountText').textContent = `${completedCount} / 30`;
+  document.getElementById('completedCountText').textContent = `${completedCount}/30`;
   document.getElementById('progressPercentText').textContent = `${pct}%`;
   document.getElementById('progressBarFill').style.width = `${pct}%`;
 
@@ -259,8 +278,37 @@ function renderHeaderStats() {
     if (i === 0 || sorted[i] === sorted[i - 1] + 1) streak++;
     else streak = 1;
   }
-  document.getElementById('streakCountText').textContent = `${streak} Day${streak === 1 ? '' : 's'}`;
+  document.getElementById('streakCountText').textContent = `${streak}d`;
   document.getElementById('savedCountBadge').textContent = state.savedPhrases.length;
+
+  const mobileDayBtnText = document.getElementById('mobileDayBtnText');
+  if (mobileDayBtnText) {
+    mobileDayBtnText.textContent = `Day ${state.currentDay}`;
+  }
+}
+
+function renderMobileDayStrip() {
+  const strip = document.getElementById('mobileDayStrip');
+  if (!strip) return;
+  strip.innerHTML = '';
+
+  CURRICULUM_DATA.forEach((item) => {
+    const pill = document.createElement('button');
+    const isCompleted = state.completedDays.includes(item.day);
+    const isActive = item.day === state.currentDay;
+
+    pill.type = 'button';
+    pill.className = `strip-day-pill ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`;
+    pill.innerHTML = `<span>Day ${item.day}</span>${isCompleted ? '<span>✓</span>' : ''}`;
+    pill.addEventListener('click', () => selectDay(item.day));
+    strip.appendChild(pill);
+
+    if (isActive) {
+      setTimeout(() => {
+        pill.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }, 50);
+    }
+  });
 }
 
 function renderSidebar() {
@@ -296,7 +344,10 @@ function renderSidebar() {
       <span>${item.day}</span>
       <span class="check-dot">${isCompleted ? '✓' : '•'}</span>
     `;
-    btn.addEventListener('click', () => selectDay(item.day));
+    btn.addEventListener('click', () => {
+      selectDay(item.day);
+      closeMobileDrawer();
+    });
     grid.appendChild(btn);
   });
 
@@ -326,6 +377,8 @@ function renderSidebar() {
     completeBtn.className = 'btn btn-primary';
     completeBtn.innerHTML = `🏆 Mark Day ${state.currentDay} Complete`;
   }
+
+  renderMobileDayStrip();
 }
 
 /* ===== GUIDED WORKFLOW STEPPER ===== */
@@ -337,10 +390,10 @@ function renderWorkflowSteps() {
   };
   const practicedArr = state.practicedPhrases[state.currentDay] || [];
 
-  document.getElementById('stepSub1').textContent = `${practicedArr.length} / 5 practiced`;
+  document.getElementById('stepSub1').textContent = `${practicedArr.length}/5 done`;
   document.getElementById('phrasesPracticedBadge').textContent = `${practicedArr.length} / 5 Practiced`;
-  document.getElementById('stepSub2').textContent = checks.listen ? '✓ Completed' : '15m Shadowing';
-  document.getElementById('stepSub3').textContent = checks.speak ? '✓ Completed' : 'PREP + Studio';
+  document.getElementById('stepSub2').textContent = checks.listen ? '✓ Done' : '15m Shadow';
+  document.getElementById('stepSub3').textContent = checks.speak ? '✓ Done' : 'PREP + Mic';
 
   const stepMap = { 1: checks.phrases, 2: checks.listen, 3: checks.speak };
 
@@ -354,12 +407,12 @@ function renderWorkflowSteps() {
 
   const flowBtn = document.getElementById('toggleFlowModeBtn');
   if (state.flowMode === 'all') {
-    flowBtn.textContent = '📑 View: All Steps Together';
+    flowBtn.textContent = '📑 View: All Steps';
     document.getElementById('stepCard1').classList.remove('hidden');
     document.getElementById('stepCard2').classList.remove('hidden');
     document.getElementById('stepCard3').classList.remove('hidden');
   } else {
-    flowBtn.textContent = '🎯 View: Guided Step-by-Step';
+    flowBtn.textContent = '🎯 View: Step-by-Step';
     document.getElementById('stepCard1').classList.toggle('hidden', state.currentStep !== 1);
     document.getElementById('stepCard2').classList.toggle('hidden', state.currentStep !== 2);
     document.getElementById('stepCard3').classList.toggle('hidden', state.currentStep !== 3);
@@ -383,15 +436,35 @@ function selectDay(dayNum) {
   renderHeaderStats();
 }
 
+/* ===== SWITCH ACTIVE MAIN VIEW (Desktop Tabs + Mobile Bottom Nav) ===== */
+function switchMainView(targetView) {
+  document.querySelectorAll('.mode-tab').forEach((t) => {
+    t.classList.toggle('active', t.dataset.view === targetView);
+  });
+  document.querySelectorAll('[data-mobile-view]').forEach((t) => {
+    t.classList.toggle('active', t.dataset.mobileView === targetView);
+  });
+
+  document.getElementById('view-lesson').classList.toggle('hidden', targetView !== 'lesson');
+  document.getElementById('view-flashcards').classList.toggle('hidden', targetView !== 'flashcards');
+  document.getElementById('view-phrasebook').classList.toggle('hidden', targetView !== 'phrasebook');
+  document.getElementById('view-shadowlab').classList.toggle('hidden', targetView !== 'shadowlab');
+
+  if (targetView === 'flashcards') {
+    buildFlashcardDeck(state.savedPhrases.length ? 'saved' : 'today');
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 /* ===== RENDER CURRENT DAY LESSON ===== */
 function renderCurrentDay() {
   const dayData = CURRICULUM_DATA.find((d) => d.day === state.currentDay) || CURRICULUM_DATA[0];
 
   const weekNames = {
-    1: 'Week 1: Survival Phrases & Thinking in English',
-    2: 'Week 2: Everyday Conversations & Questions',
-    3: 'Week 3: Expressing Opinions & Storytelling',
-    4: 'Week 4: Real-World Fluency & Confidence'
+    1: 'Week 1: Survival Phrases',
+    2: 'Week 2: Everyday Conversations',
+    3: 'Week 3: PREP Storytelling',
+    4: 'Week 4: Real-World Fluency'
   };
 
   document.getElementById('dayEyebrow').textContent = `Day ${dayData.day} of 30 • ${weekNames[dayData.week]}`;
@@ -417,14 +490,14 @@ function renderCurrentDay() {
       <div class="phrase-top">
         <div class="phrase-pattern">
           ${idx + 1}. "${p.phrase}"
-          ${isPracticed ? '<span style="color: var(--status-success); font-size: 0.8rem; margin-left: 6px;">✓ Practiced</span>' : ''}
+          ${isPracticed ? '<span style="color: var(--status-success); font-size: 0.78rem; margin-left: 4px;">✓</span>' : ''}
         </div>
         <div class="phrase-actions">
-          <button class="btn btn-sm listen-normal-btn" type="button">🔊 Listen (1x)</button>
-          <button class="btn btn-sm listen-slow-btn" type="button">🐢 Shadow (0.75x)</button>
-          <button class="btn btn-sm speak-check-btn" type="button">🎙️ Speak & Check</button>
+          <button class="btn btn-sm listen-normal-btn" type="button">🔊 Listen</button>
+          <button class="btn btn-sm listen-slow-btn" type="button">🐢 Shadow</button>
+          <button class="btn btn-sm speak-check-btn" type="button">🎙️ Speak</button>
           <button class="bookmark-btn ${isSaved ? 'saved' : ''}" type="button" title="Save to Flashcards">
-            ${isSaved ? '⭐' : '☆'}
+            ${isSaved ? '⭐ Saved' : '☆ Save'}
           </button>
         </div>
       </div>
@@ -459,10 +532,8 @@ function renderCurrentDay() {
     phrasesContainer.appendChild(card);
   });
 
-  // Render Step 2: Roleplay Dialogue
   renderDialogue(dayData);
 
-  // Render Step 3: Speaking Prompt & PREP
   document.getElementById('speakingQuestion').textContent = dayData.prompt.question;
   document.getElementById('prepPoint').textContent = dayData.prompt.prep.point;
   document.getElementById('prepReason').textContent = dayData.prompt.prep.reason;
@@ -482,16 +553,16 @@ function renderDialogue(dayData) {
     row.className = `dialogue-line ${isYou ? 'you' : 'partner'}`;
     row.id = `dialogue-line-${index}`;
     row.innerHTML = `
-      <div style="flex: 1;">
+      <div style="flex: 1; min-width: 0;">
         <span class="speaker-tag ${isYou ? 'you' : 'partner'}">
-          ${isYou ? '🗣️ YOU (Your Turn to Speak)' : '👤 CONVERSATION PARTNER'}
+          ${isYou ? '🗣️ YOU (Your Turn)' : '👤 PARTNER'}
         </span>
         <div class="dialogue-text ${blindListeningMode ? 'blurred' : ''}" title="${
-      blindListeningMode ? 'Click to reveal text' : ''
+      blindListeningMode ? 'Tap to reveal text' : ''
     }">${line.text}</div>
         <div class="speech-feedback" id="dialogue-feedback-${index}"></div>
       </div>
-      <div style="display: flex; gap: 0.35rem;">
+      <div style="display: flex; gap: 0.35rem; flex-shrink: 0;">
         <button class="btn btn-sm listen-line-btn" type="button" title="Listen">🔊</button>
         ${
           isYou
@@ -545,7 +616,7 @@ function toggleSavePhrase(dayNum, phraseObj, btnEl) {
   if (existingIdx > -1) {
     state.savedPhrases.splice(existingIdx, 1);
     btnEl.classList.remove('saved');
-    btnEl.textContent = '☆';
+    btnEl.textContent = '☆ Save';
     showToast('Removed phrase from Saved Flashcards');
   } else {
     state.savedPhrases.push({
@@ -555,7 +626,7 @@ function toggleSavePhrase(dayNum, phraseObj, btnEl) {
       context: phraseObj.context
     });
     btnEl.classList.add('saved');
-    btnEl.textContent = '⭐';
+    btnEl.textContent = '⭐ Saved';
     showToast('⭐ Saved to your Flashcard Deck!');
   }
   saveState();
@@ -626,7 +697,6 @@ function startInteractiveRoleplay() {
           setTimeout(stepRoleplay, 900);
         });
       } else {
-        // Fallback 5-second pause for user to read aloud
         setTimeout(stepRoleplay, 4500);
       }
     }
@@ -641,7 +711,6 @@ function updateTimerDisplay() {
   const secs = String(timerSeconds % 60).padStart(2, '0');
   document.getElementById('timerDisplay').textContent = `${mins}:${secs}`;
 
-  // Update SVG Ring Progress (circumference = 2 * pi * 55 ≈ 345)
   const ring = document.getElementById('timerRingProgress');
   if (ring) {
     const fraction = (targetDurationSeconds - timerSeconds) / targetDurationSeconds;
@@ -656,11 +725,11 @@ function toggleTimer() {
   if (timerRunning) {
     clearInterval(timerInterval);
     timerRunning = false;
-    btn.textContent = '▶️ Resume Timer';
+    btn.textContent = '▶️ Resume';
     subText.textContent = 'PAUSED';
   } else {
     timerRunning = true;
-    btn.textContent = '⏸️ Pause Timer';
+    btn.textContent = '⏸️ Pause';
     subText.textContent = isRecording ? 'RECORDING' : 'SPEAKING';
     timerInterval = setInterval(() => {
       if (timerSeconds > 0) {
@@ -670,10 +739,10 @@ function toggleTimer() {
         clearInterval(timerInterval);
         timerRunning = false;
         subText.textContent = 'DONE!';
-        btn.textContent = '🎉 Time Complete!';
+        btn.textContent = '🎉 Done!';
         if (isRecording) toggleVoiceRecording();
         markRoutineStep('speak', true);
-        showToast('🎉 2-Minute Speaking Challenge Complete!');
+        showToast('🎉 Speaking Challenge Complete!');
       }
     }, 1000);
   }
@@ -796,7 +865,7 @@ async function toggleVoiceRecording() {
     if (timerRunning) toggleTimer();
 
     recordBtn.className = 'btn btn-primary';
-    recordBtn.innerHTML = '🎙️ Start Studio Recording';
+    recordBtn.innerHTML = '🎙️ Record Voice';
     subText.textContent = 'SAVED';
     return;
   }
@@ -832,7 +901,7 @@ async function toggleVoiceRecording() {
     mediaRecorder.start();
     isRecording = true;
     recordBtn.className = 'btn btn-danger';
-    recordBtn.innerHTML = '⏹️ Stop Studio Recording';
+    recordBtn.innerHTML = '⏹️ Stop Recording';
     subText.textContent = 'RECORDING';
 
     startWaveformVisualizer(stream);
@@ -950,11 +1019,29 @@ document.addEventListener('DOMContentLoaded', () => {
     window.speechSynthesis.onvoiceschanged = populateVoiceList;
   }
 
-  document.getElementById('voiceSelect').addEventListener('change', (e) => {
-    state.selectedVoiceURI = e.target.value;
-    saveState();
-    showToast('🔊 Updated English speaking voice!');
+  // Sync Desktop & Mobile Voice Selectors
+  ['voiceSelect', 'voiceSelectMobile'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('change', (e) => {
+        state.selectedVoiceURI = e.target.value;
+        saveState();
+        populateVoiceList();
+        showToast('🔊 Updated English speaking voice!');
+      });
+    }
   });
+
+  // Mobile Drawer Controls
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const mobileBottomRoadmapBtn = document.getElementById('mobileBottomRoadmapBtn');
+  const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+  const backdrop = document.getElementById('mobileDrawerBackdrop');
+
+  if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', openMobileDrawer);
+  if (mobileBottomRoadmapBtn) mobileBottomRoadmapBtn.addEventListener('click', openMobileDrawer);
+  if (closeDrawerBtn) closeDrawerBtn.addEventListener('click', closeMobileDrawer);
+  if (backdrop) backdrop.addEventListener('click', closeMobileDrawer);
 
   renderHeaderStats();
   renderSidebar();
@@ -988,7 +1075,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => {
       const target = Number(btn.dataset.targetStep);
       setStep(target);
-      window.scrollTo({ top: 140, behavior: 'smooth' });
+      window.scrollTo({ top: 100, behavior: 'smooth' });
     });
   });
 
@@ -1073,8 +1160,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('blindListenToggleBtn').addEventListener('click', (e) => {
     blindListeningMode = !blindListeningMode;
     e.currentTarget.textContent = blindListeningMode
-      ? '👁️ Blind Listening: On (Click text to reveal)'
-      : '🙈 Blind Listening: Off';
+      ? '👁️ Blind Mode: On'
+      : '🙈 Blind Mode: Off';
     const dayData = CURRICULUM_DATA.find((d) => d.day === state.currentDay) || CURRICULUM_DATA[0];
     renderDialogue(dayData);
   });
@@ -1102,22 +1189,14 @@ document.addEventListener('DOMContentLoaded', () => {
     saveState();
   });
 
-  // Main View Switcher Tabs
+  // Desktop View Switcher Tabs
   document.querySelectorAll('.mode-tab').forEach((tab) => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.mode-tab').forEach((t) => t.classList.remove('active'));
-      tab.classList.add('active');
+    tab.addEventListener('click', () => switchMainView(tab.dataset.view));
+  });
 
-      const targetView = tab.dataset.view;
-      document.getElementById('view-lesson').classList.toggle('hidden', targetView !== 'lesson');
-      document.getElementById('view-flashcards').classList.toggle('hidden', targetView !== 'flashcards');
-      document.getElementById('view-phrasebook').classList.toggle('hidden', targetView !== 'phrasebook');
-      document.getElementById('view-shadowlab').classList.toggle('hidden', targetView !== 'shadowlab');
-
-      if (targetView === 'flashcards') {
-        buildFlashcardDeck(state.savedPhrases.length ? 'saved' : 'today');
-      }
-    });
+  // Mobile Bottom Navigation Bar Tabs
+  document.querySelectorAll('[data-mobile-view]').forEach((btn) => {
+    btn.addEventListener('click', () => switchMainView(btn.dataset.mobileView));
   });
 
   // Flashcard Controls
@@ -1146,7 +1225,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('deckSourceSavedBtn').addEventListener('click', () => {
     if (!state.savedPhrases.length) {
-      showToast('💡 Click ☆ on any phrase in your Daily Lesson to save it first!');
+      showToast('💡 Tap ☆ Save on any phrase in your Daily Workout first!');
       buildFlashcardDeck('today');
     } else {
       buildFlashcardDeck('saved');

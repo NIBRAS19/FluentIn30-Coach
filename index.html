@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark" data-brand="indigo">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>FluentIn30 Studio — 30-Day English Communication Coach</title>
   <!-- Prevent Flash of Unstyled Theme -->
   <script>
@@ -22,23 +22,29 @@
 </head>
 <body>
 
+  <!-- Mobile Sidebar Backdrop Overlay -->
+  <div id="mobileDrawerBackdrop" class="drawer-backdrop hidden"></div>
+
   <!-- Top Navigation & Theme/Progress Header -->
   <header class="top-header">
     <div class="header-inner">
       <div class="brand">
+        <button id="mobileMenuBtn" class="mobile-menu-btn" type="button" aria-label="Open 30-Day Roadmap">
+          🗓️ <span id="mobileDayBtnText">Day 1</span>
+        </button>
         <div class="brand-badge">30</div>
-        <div>
+        <div class="brand-text-wrap">
           <div class="brand-title">
-            FluentIn30 Studio
-            <span class="brand-tag">PRO FLOW</span>
+            FluentIn30 <span class="hide-xs">Studio</span>
+            <span class="brand-tag hide-sm">PRO FLOW</span>
           </div>
-          <div class="brand-subtitle">Guided 45-Min Daily English Speaking & Fluency System</div>
+          <div class="brand-subtitle hide-md">Guided 45-Min Daily English Speaking & Fluency System</div>
         </div>
       </div>
 
       <div class="header-controls">
-        <!-- Voice Selector -->
-        <select id="voiceSelect" class="voice-select" title="Choose English Accent / Voice">
+        <!-- Voice Selector (Desktop/Tablet, also accessible in drawer on mobile) -->
+        <select id="voiceSelect" class="voice-select hide-sm" title="Choose English Accent / Voice">
           <option value="">🌐 Auto English Voice</option>
         </select>
 
@@ -48,30 +54,48 @@
           <button class="swatch-btn swatch-emerald" data-brand-choice="emerald" title="Emerald Mint Schema" type="button"></button>
           <button class="swatch-btn swatch-ocean" data-brand-choice="ocean" title="Ocean Sapphire Schema" type="button"></button>
           <button class="swatch-btn swatch-amber" data-brand-choice="amber" title="Sunset Amber Schema" type="button"></button>
-          <span style="opacity: 0.25; padding: 0 2px;">|</span>
+          <span class="swatch-divider">|</span>
           <button id="themeToggleBtn" class="theme-toggle-btn" title="Switch Dark / Light Mode" type="button">☀️</button>
         </div>
 
         <!-- Streak & 30-Day Progress -->
         <div class="stat-pill">
-          🔥 Streak: <span id="streakCountText" class="stat-highlight">0 Days</span>
+          🔥 <span class="hide-sm">Streak:</span> <span id="streakCountText" class="stat-highlight">0d</span>
         </div>
         <div class="stat-pill">
-          🏆 <span id="completedCountText" class="stat-highlight">0 / 30</span>
-          <div class="progress-bar-wrap">
+          🏆 <span id="completedCountText" class="stat-highlight">0/30</span>
+          <div class="progress-bar-wrap hide-xs">
             <div id="progressBarFill" class="progress-bar-fill"></div>
           </div>
-          <span id="progressPercentText">0%</span>
+          <span id="progressPercentText" class="hide-sm">0%</span>
         </div>
       </div>
     </div>
+
+    <!-- Mobile Horizontal Quick-Swipe Day Strip (Visible on < 1024px) -->
+    <div id="mobileDayStrip" class="mobile-day-strip"></div>
   </header>
 
   <!-- Main Workspace Layout -->
   <div class="app-layout">
 
-    <!-- Left Sidebar: 30-Day Roadmap & Daily Routine Checklist -->
-    <aside class="sidebar">
+    <!-- Left Sidebar / Mobile Slide-Over Drawer: 30-Day Roadmap & Checklist -->
+    <aside id="appSidebar" class="sidebar">
+      <div class="drawer-mobile-top">
+        <div style="font-weight: 800; font-size: 1.05rem;">🗓️ 30-Day Roadmap & Checklist</div>
+        <button id="closeDrawerBtn" class="btn btn-sm" type="button">✕ Close</button>
+      </div>
+
+      <!-- Mobile-only Voice Accent Selector inside Drawer -->
+      <div class="mobile-voice-box">
+        <label for="voiceSelectMobile" style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 4px;">
+          🌐 ENGLISH VOICE ACCENT
+        </label>
+        <select id="voiceSelectMobile" class="voice-select" style="max-width: 100%; width: 100%;">
+          <option value="">🌐 Auto Best English Voice</option>
+        </select>
+      </div>
+
       <div class="sidebar-block-header">
         <span>30-Day Curriculum</span>
         <span id="currentWeekBadge" style="color: var(--brand-text);">All Weeks</span>
@@ -107,7 +131,7 @@
         </label>
       </div>
 
-      <button id="markDayCompleteBtn" class="btn btn-primary" type="button" style="width: 100%; padding: 0.7rem;">
+      <button id="markDayCompleteBtn" class="btn btn-primary" type="button" style="width: 100%; padding: 0.75rem;">
         🏆 Mark Day 1 Complete
       </button>
     </aside>
@@ -115,26 +139,26 @@
     <!-- Main Content Area -->
     <main class="main-content">
 
-      <!-- Top View Switcher -->
+      <!-- Top View Switcher (Desktop/Tablet) -->
       <div class="nav-tabs-bar">
         <div class="mode-tabs">
           <button class="mode-tab active" data-view="lesson" type="button">
-            📅 Daily Guided Workout
+            📅 <span class="tab-label">Daily Workout</span>
           </button>
           <button class="mode-tab" data-view="flashcards" type="button">
-            ⭐ Saved Phrases & Quiz <span id="savedCountBadge" class="badge-count">0</span>
+            ⭐ <span class="tab-label">Saved & Quiz</span> <span id="savedCountBadge" class="badge-count">0</span>
           </button>
           <button class="mode-tab" data-view="phrasebook" type="button">
-            🛟 Emergency Phrasebook
+            🛟 <span class="tab-label">Phrasebook</span>
           </button>
           <button class="mode-tab" data-view="shadowlab" type="button">
-            🎙️ Custom Shadowing Lab
+            🎙️ <span class="tab-label">Shadow Lab</span>
           </button>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 0.4rem;">
+        <div class="flow-toggle-wrap">
           <button id="toggleFlowModeBtn" class="btn btn-sm" type="button" title="Switch between Step-by-Step Focus or All Steps View">
-            📑 View: Guided Step-by-Step
+            🎯 View: Step-by-Step
           </button>
         </div>
       </div>
@@ -142,15 +166,15 @@
       <!-- =================================================================
            VIEW 1: DAILY GUIDED WORKOUT
            ================================================================= -->
-      <div id="view-lesson" style="display: flex; flex-direction: column; gap: var(--space-5);">
+      <div id="view-lesson" class="lesson-view-stack">
 
         <!-- Day Hero Banner -->
         <section class="day-hero">
           <div class="day-hero-top">
             <span id="dayEyebrow" class="day-eyebrow">Day 1 of 30 • Week 1</span>
-            <div style="display: flex; gap: var(--space-2);">
-              <button id="prevDayBtn" class="btn btn-sm" type="button">← Prev Day</button>
-              <button id="nextDayBtn" class="btn btn-sm" type="button">Next Day →</button>
+            <div class="day-nav-btns">
+              <button id="prevDayBtn" class="btn btn-sm" type="button">← Prev</button>
+              <button id="nextDayBtn" class="btn btn-sm" type="button">Next →</button>
             </div>
           </div>
           <h1 id="dayTitle" class="day-title">Natural Self-Introduction</h1>
@@ -162,25 +186,25 @@
         <div class="workflow-bar">
           <button class="step-pill active" data-step="1" type="button">
             <div class="step-num" id="stepNum1">1</div>
-            <div>
-              <div class="step-info-title">5 Sentence Starters</div>
-              <div class="step-info-sub" id="stepSub1">0 / 5 practiced</div>
+            <div class="step-info-wrap">
+              <div class="step-info-title">5 Phrases</div>
+              <div class="step-info-sub" id="stepSub1">0 / 5 done</div>
             </div>
           </button>
 
           <button class="step-pill" data-step="2" type="button">
             <div class="step-num" id="stepNum2">2</div>
-            <div>
-              <div class="step-info-title">Roleplay Simulator</div>
-              <div class="step-info-sub" id="stepSub2">15m Shadowing</div>
+            <div class="step-info-wrap">
+              <div class="step-info-title">Roleplay</div>
+              <div class="step-info-sub" id="stepSub2">15m Shadow</div>
             </div>
           </button>
 
           <button class="step-pill" data-step="3" type="button">
             <div class="step-num" id="stepNum3">3</div>
-            <div>
-              <div class="step-info-title">2-Min Speaking Studio</div>
-              <div class="step-info-sub" id="stepSub3">PREP + Voice Record</div>
+            <div class="step-info-wrap">
+              <div class="step-info-title">2m Studio</div>
+              <div class="step-info-sub" id="stepSub3">PREP + Mic</div>
             </div>
           </button>
         </div>
@@ -190,26 +214,26 @@
           <div class="section-header">
             <div>
               <h2 class="section-title">
-                Step 1: Master Today's 5 Sentence Starters
+                Step 1: Today's 5 Sentence Starters
                 <span class="section-badge" id="phrasesPracticedBadge">0 / 5 Practiced</span>
               </h2>
-              <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.25rem;">
-                Listen at normal speed, shadow out loud at 0.75x speed, and click <strong>🎙️ Speak & Check</strong> to verify your clarity. Click ⭐ to save your favorites!
+              <p class="section-desc">
+                Tap <strong>🔊 Listen</strong>, repeat with <strong>🐢 Shadow</strong>, and test clarity with <strong>🎙️ Speak</strong>. Tap ⭐ to bookmark!
               </p>
             </div>
-            <button id="playAllPhrasesBtn" class="btn btn-primary btn-sm" type="button">
-              ▶️ Auto-Play All 5 Examples
+            <button id="playAllPhrasesBtn" class="btn btn-primary btn-sm full-width-xs" type="button">
+              ▶️ Auto-Play All 5
             </button>
           </div>
 
           <div id="phrasesList" class="phrases-list"></div>
 
           <div class="step-footer-nav">
-            <span style="font-size: 0.84rem; color: var(--text-muted);">
-              💡 Tip: Say each example sentence out loud 3 times before moving to Step 2.
+            <span class="footer-hint">
+              💡 Say each example out loud 3 times before moving to Step 2.
             </span>
-            <button class="btn btn-primary goto-step-btn" data-target-step="2" type="button">
-              Continue to Step 2: Roleplay Simulator →
+            <button class="btn btn-primary goto-step-btn full-width-xs" data-target-step="2" type="button">
+              Next: Roleplay Simulator →
             </button>
           </div>
         </section>
@@ -222,7 +246,7 @@
                 Step 2: Real-World Conversation Simulator
                 <span class="section-badge">Ear & Mouth Training</span>
               </h2>
-              <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.25rem;">
+              <p class="section-desc">
                 Practice natural back-and-forth flow. Try <strong>🎭 Interactive Roleplay</strong> where the app speaks Partner's lines and listens to You!
               </p>
             </div>
@@ -230,19 +254,19 @@
 
           <!-- Dialogue Controls Toolbar -->
           <div class="dialogue-toolbar">
-            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap;">
+            <div class="dialogue-toolbar-btns">
               <button id="playDialogueBtn" class="btn btn-primary btn-sm" type="button">
-                🎧 Listen Full Dialogue
+                🎧 Listen All
               </button>
               <button id="interactiveRoleplayBtn" class="btn btn-sm" type="button">
-                🎭 Interactive Roleplay (Partner + Mic)
+                🎭 Interactive Roleplay
               </button>
               <button id="blindListenToggleBtn" class="btn btn-sm" type="button">
-                🙈 Blind Listening: Off
+                🙈 Blind Mode: Off
               </button>
             </div>
-            <span id="roleplayStatusText" style="font-size: 0.82rem; color: var(--brand-text); font-weight: 600;">
-              Click any line's 🔊 button or start a roleplay mode
+            <span id="roleplayStatusText" class="roleplay-status">
+              Tap any line's 🔊 button or start a roleplay mode
             </span>
           </div>
 
@@ -250,10 +274,10 @@
 
           <div class="step-footer-nav">
             <button class="btn goto-step-btn" data-target-step="1" type="button">
-              ← Back to Step 1: Phrases
+              ← Step 1
             </button>
             <button class="btn btn-primary goto-step-btn" data-target-step="3" type="button">
-              Continue to Step 3: 2-Min Speaking Studio →
+              Next: 2-Min Studio →
             </button>
           </div>
         </section>
@@ -264,13 +288,13 @@
             <div>
               <h2 class="section-title">
                 Step 3: 2-Minute Active Speaking Studio
-                <span class="section-badge">PREP Method + Live Transcript</span>
+                <span class="section-badge">PREP + Live Transcript</span>
               </h2>
-              <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.25rem;">
-                Structure your thoughts with <strong>P-R-E-P</strong>, hit <strong>🎙️ Start Studio Recording</strong>, and speak non-stop until the ring completes!
+              <p class="section-desc">
+                Structure your thoughts with <strong>P-R-E-P</strong>, tap <strong>🎙️ Record</strong>, and speak non-stop until the timer ring finishes!
               </p>
             </div>
-            <div style="display: flex; gap: 0.35rem;">
+            <div class="duration-presets">
               <button class="btn btn-sm duration-preset-btn" data-seconds="60" type="button">1:00</button>
               <button class="btn btn-sm duration-preset-btn active" data-seconds="120" type="button" style="border-color: var(--brand-primary);">2:00</button>
               <button class="btn btn-sm duration-preset-btn" data-seconds="180" type="button">3:00</button>
@@ -278,17 +302,17 @@
           </div>
 
           <div class="prompt-banner">
-            <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--brand-text); font-weight: 800;">
+            <div class="prompt-eyebrow">
               🎤 Today's Speaking Challenge
             </div>
-            <div id="speakingQuestion" style="font-size: 1.18rem; font-weight: 800; color: var(--text-primary); margin-top: 0.25rem;"></div>
+            <div id="speakingQuestion" class="prompt-question"></div>
           </div>
 
           <!-- PREP Formula Helper Cards -->
           <div class="prep-grid">
             <div class="prep-step">
               <span class="prep-letter">P</span>
-              <h4>Point (State Clearly)</h4>
+              <h4>Point (Start Clear)</h4>
               <p id="prepPoint"></p>
             </div>
             <div class="prep-step">
@@ -298,7 +322,7 @@
             </div>
             <div class="prep-step">
               <span class="prep-letter">E</span>
-              <h4>Example (Story / Detail)</h4>
+              <h4>Example (Detail)</h4>
               <p id="prepExample"></p>
             </div>
             <div class="prep-step">
@@ -322,10 +346,10 @@
             </div>
 
             <div class="studio-right">
-              <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap;">
-                <div style="display: flex; gap: var(--space-2); flex-wrap: wrap;">
+              <div class="studio-btn-row">
+                <div class="studio-main-btns">
                   <button id="recordVoiceBtn" class="btn btn-primary" type="button">
-                    🎙️ Start Studio Recording
+                    🎙️ Record Voice
                   </button>
                   <button id="timerToggleBtn" class="btn" type="button">
                     ⏱️ Timer Only
@@ -349,7 +373,7 @@
 
           <!-- Recorded Audio Player -->
           <div id="audioPlaybackArea" class="audio-playback-area">
-            <span style="font-size: 0.86rem; font-weight: 700; color: var(--status-success);">🎧 Latest Take:</span>
+            <span style="font-size: 0.86rem; font-weight: 700; color: var(--status-success);">🎧 Your Recording:</span>
             <audio id="recordedAudioPlayer" controls></audio>
             <a id="downloadAudioBtn" class="btn btn-sm" href="#" download="Day-1-English.webm">💾 Save Audio</a>
           </div>
@@ -363,10 +387,10 @@
 
           <div class="step-footer-nav">
             <button class="btn goto-step-btn" data-target-step="2" type="button">
-              ← Back to Step 2: Roleplay
+              ← Step 2
             </button>
             <button id="finishDayCelebrationBtn" class="btn btn-success" type="button">
-              🎉 Complete Day & Go to Next Day →
+              🎉 Complete Day & Next →
             </button>
           </div>
         </section>
@@ -383,32 +407,32 @@
                 ⭐ Flashcard Practice & Saved Phrases
                 <span class="section-badge" id="flashcardDeckInfo">Interactive Recall</span>
               </h2>
-              <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.25rem;">
-                Test your memory! Read the scenario prompt, say the phrase out loud, then click the card to flip and listen.
+              <p class="section-desc">
+                Test your memory! Read the scenario prompt, say the phrase out loud, then tap the card to flip and listen.
               </p>
             </div>
-            <div style="display: flex; gap: var(--space-2);">
-              <button id="deckSourceSavedBtn" class="btn btn-sm active" type="button">⭐ My Saved Phrases</button>
-              <button id="deckSourceCurrentDayBtn" class="btn btn-sm" type="button">📅 Today's 5 Phrases</button>
-              <button id="deckSourceRandomBtn" class="btn btn-sm" type="button">🎲 Random 10 Mix</button>
+            <div class="deck-source-btns">
+              <button id="deckSourceSavedBtn" class="btn btn-sm active" type="button">⭐ Saved</button>
+              <button id="deckSourceCurrentDayBtn" class="btn btn-sm" type="button">📅 Today's 5</button>
+              <button id="deckSourceRandomBtn" class="btn btn-sm" type="button">🎲 Random 10</button>
             </div>
           </div>
 
           <div class="flashcard-stage">
             <div id="flashcardBox" class="flashcard-box">
               <span class="section-badge" id="flashcardCounter">Card 1 of 5</span>
-              <div id="flashcardFront" style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary);"></div>
+              <div id="flashcardFront" class="flashcard-front-text"></div>
               <div id="flashcardBack" class="hidden" style="display: flex; flex-direction: column; gap: 0.5rem;">
-                <div id="flashcardExample" style="font-size: 1.1rem; color: var(--brand-text); font-weight: 700;"></div>
-                <div id="flashcardContext" style="font-size: 0.88rem; color: var(--text-muted);"></div>
+                <div id="flashcardExample" style="font-size: 1.05rem; color: var(--brand-text); font-weight: 700;"></div>
+                <div id="flashcardContext" style="font-size: 0.86rem; color: var(--text-muted);"></div>
               </div>
-              <span style="font-size: 0.78rem; color: var(--text-muted);">👆 Click card to flip • Press 🔊 to hear</span>
+              <span style="font-size: 0.78rem; color: var(--text-muted);">👆 Tap card to flip • Tap 🔊 to hear</span>
             </div>
 
-            <div style="display: flex; align-items: center; justify-content: center; gap: var(--space-3); margin-top: var(--space-4);">
-              <button id="prevFlashcardBtn" class="btn" type="button">← Previous</button>
-              <button id="speakFlashcardBtn" class="btn btn-primary" type="button">🔊 Listen Example</button>
-              <button id="nextFlashcardBtn" class="btn" type="button">Next Card →</button>
+            <div class="flashcard-controls">
+              <button id="prevFlashcardBtn" class="btn" type="button">← Prev</button>
+              <button id="speakFlashcardBtn" class="btn btn-primary" type="button">🔊 Listen</button>
+              <button id="nextFlashcardBtn" class="btn" type="button">Next →</button>
             </div>
           </div>
         </section>
@@ -419,18 +443,18 @@
            ================================================================= -->
       <div id="view-phrasebook" class="hidden">
         <div class="section-card" style="margin-bottom: var(--space-5);">
-          <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap;">
+          <div class="phrasebook-top-bar">
             <div>
               <h2 class="section-title">🛟 Emergency Conversation Phrasebook</h2>
-              <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;">
+              <p class="section-desc">
                 Instant fillers, connectors, and paraphrasing rescues so you never freeze in a conversation.
               </p>
             </div>
             <input
               id="phrasebookSearchInput"
+              class="phrasebook-search"
               type="search"
-              placeholder="🔍 Search phrases (e.g. think, repeat, word)..."
-              style="background: var(--surface-2); border: 1px solid var(--border-subtle); color: var(--text-primary); padding: 0.55rem 1rem; border-radius: var(--radius-full); min-width: 260px; font-size: 0.86rem;"
+              placeholder="🔍 Search phrases (e.g. think, repeat)..."
             />
           </div>
         </div>
@@ -443,26 +467,26 @@
       <div id="view-shadowlab" class="hidden">
         <section class="section-card">
           <h2 class="section-title">🎙️ Any-Sentence Pronunciation & Shadowing Coach</h2>
-          <p style="color: var(--text-secondary); font-size: 0.92rem; margin-top: 0.35rem; margin-bottom: var(--space-4);">
+          <p class="section-desc" style="margin-bottom: var(--space-4);">
             Type or paste any sentence you need for a meeting, interview, or daily conversation. Listen at normal or slow speed, then test your spoken clarity!
           </p>
 
           <textarea
             id="customShadowInput"
             class="notes-textarea"
-            style="min-height: 120px; font-size: 1.05rem;"
+            style="min-height: 120px; font-size: 1rem;"
             placeholder="Type any English sentence here..."
           >Hi everyone, thanks for joining today's call. I'd love to share a quick update on what we accomplished this week.</textarea>
 
-          <div style="display: flex; gap: var(--space-3); flex-wrap: wrap; margin-top: var(--space-4);">
+          <div class="custom-lab-btns">
             <button id="customSpeakNormalBtn" class="btn btn-primary" type="button">
-              🔊 Listen Natural Speed (1.0x)
+              🔊 Listen (1.0x)
             </button>
             <button id="customSpeakSlowBtn" class="btn" type="button">
-              🐢 Listen Slow for Shadowing (0.75x)
+              🐢 Shadow (0.75x)
             </button>
             <button id="customCheckPronunciationBtn" class="btn btn-success" type="button">
-              🎙️ Speak & Check My Clarity
+              🎙️ Speak & Check
             </button>
           </div>
 
@@ -472,6 +496,30 @@
 
     </main>
   </div>
+
+  <!-- Mobile Bottom Navigation Bar (Visible on < 768px) -->
+  <nav class="mobile-bottom-nav" aria-label="Mobile Navigation">
+    <button class="mobile-nav-item active" data-mobile-view="lesson" type="button">
+      <span class="mobile-nav-icon">📅</span>
+      <span class="mobile-nav-label">Workout</span>
+    </button>
+    <button class="mobile-nav-item" data-mobile-view="flashcards" type="button">
+      <span class="mobile-nav-icon">⭐</span>
+      <span class="mobile-nav-label">Quiz</span>
+    </button>
+    <button class="mobile-nav-item" data-mobile-view="phrasebook" type="button">
+      <span class="mobile-nav-icon">🛟</span>
+      <span class="mobile-nav-label">Phrases</span>
+    </button>
+    <button class="mobile-nav-item" data-mobile-view="shadowlab" type="button">
+      <span class="mobile-nav-icon">🎙️</span>
+      <span class="mobile-nav-label">Lab</span>
+    </button>
+    <button id="mobileBottomRoadmapBtn" class="mobile-nav-item" type="button">
+      <span class="mobile-nav-icon">🗓️</span>
+      <span class="mobile-nav-label">30 Days</span>
+    </button>
+  </nav>
 
   <!-- Toast Container -->
   <div id="toastContainer" class="toast-container"></div>
